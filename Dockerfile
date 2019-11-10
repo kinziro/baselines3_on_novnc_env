@@ -1,18 +1,5 @@
 # CPUの場合
-FROM tensorflow/tensorflow:1.13.1-py3
-
-# aptのミラーを日本に変更し更新
-RUN sed -i.bak -e 's;http://archive.ubuntu.com;http://jp.archive.ubuntu.com;g' /etc/apt/sources.list
-RUN apt-get update \
- && apt-get -y upgrade
-
-# 汎用パッケージインストール
-RUN apt-get install -y --no-install-recommends software-properties-common \
- && add-apt-repository -y ppa:jonathonf/vim \
- && apt-get update \
- && apt-get install -y --no-install-recommends \
-              git vim sudo wget openssh-server \
-              xterm mesa-utils x11-apps
+FROM novnc-ssh
 
 # python関係のパッケージインストール
 RUN apt-get install -y --no-install-recommends \
@@ -54,41 +41,7 @@ RUN pip3 install -r /ingredients/requirements_other.txt
 RUN apt-get clean \
  && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
-# sshの設定
-# sshサービスの起動とリモートでGPUを使うための設定
-RUN ( echo "#!/bin/bash"; \
-      echo ""; \
-      echo "service ssh start"; \
-      echo "tail -f /dev/null"; ) > /root/entrypoint.sh && \
-      chmod +x /root/entrypoint.sh && \
-      sed -i.bak 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-      echo "PermitUserEnvironment yes" >> /etc/ssh/sshd_config && \
-      ( echo ""; \
-        echo "export PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:$PATH"; \
-        echo "export LIBRARY_PATH=/usr/local/cuda/lib64/stubs:"; \
-        echo "export LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64"; \
-      ) >> /root/.bashrc && \
-      mkdir /root/.ssh && chmod 700 /root/.ssh && \
-      ( echo "PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:$PATH"; \
-        echo "LIBRARY_PATH=/usr/local/cuda/lib64/stubs:"; \
-         echo "LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64"; \
-      ) >> /root/.ssh/environment
-
-# ssh用パスワードの設定
-RUN echo 'root:P@ssw0rd' | chpasswd
-
-# ユーザーの切り替え
-RUN groupadd -g 1000 developer && \
-    useradd  -u 1000 -g 1000 --groups sudo --create-home --shell /bin/bash developer && \
-    echo 'developer:P@ssw0rd' | chpasswd
-RUN mkdir -p /home/developer/workspace
-RUN mkdir -p /workspace
-RUN cp /root/.bashrc /home/developer/
-USER developer
-
 # ワーキングスペースの作成
-WORKDIR /home/developer/workspace
+WORKDIR /home/user/workspace
 
-EXPOSE 22
-CMD ["/root/entrypoint.sh"]
 

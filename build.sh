@@ -1,1 +1,1 @@
-docker build -t baselines-env .
+docker build -t baselines_on_novnc-env .
