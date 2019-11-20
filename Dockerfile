@@ -2,6 +2,7 @@
 FROM novnc-ssh
 
 # python関係のパッケージインストール
+RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
             python3.5-dev python3-tk \
  && wget https://bootstrap.pypa.io/get-pip.py \
@@ -25,7 +26,7 @@ RUN pip3 install -r /ingredients/requirements_gym.txt \
  && pip3 install pyglet==1.3.2
 
 # 強化学習関係のインストール
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get install -y --fix-missing --no-install-recommends \
         cmake libopenmpi-dev zlib1g-dev \
         python3-opengl libjpeg-dev \
         swig libboost-all-dev libsdl2-dev
