@@ -1,10 +1,12 @@
 #!/bin/bash
 
-container=baselines_on_novnc-container
-image=baselines_on_novnc-env
+container=baselines3_on_novnc-container
+image=baselines3_on_novnc-env
 port=6080
 extra_run_args=""
 quiet=""
+workspace=/Users/kazushi/Develop/Research/RL_workspace/
+ssh_port=8022
 
 show_help() {
 cat << EOF
@@ -129,8 +131,8 @@ docker run \
   --name $container \
   ${mount_local} \
   $port_arg \
-  -v /Users/kazushi/Develop/Research/:/home/user/workspace/ \
-  -p 8022:22 \
+  -v $workspace:/home/user/workspace/ \
+  -p $ssh_port:22 \
   $extra_run_args \
   $image >/dev/null
 
